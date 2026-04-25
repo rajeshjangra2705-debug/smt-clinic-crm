@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SMT Clinic CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080f;--surface:#0e1120;--surface2:#151929;--border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.12);--accent:#4f6ef7;--accent2:#7c3aed;--accent3:#06d6a0;
+  --orange:#f97316;--red:#ef4444;--yellow:#eab308;--text:#e8eaf6;--muted:#8890b5;--glow:rgba(79,110,247,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── LOGIN ── */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:var(--bg);}
+#login-screen::before{content:'';position:fixed;width:600px;height:600px;background:radial-gradient(circle,rgba(79,110,247,0.1) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.login-card{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:36px 32px;width:100%;max-width:400px;box-shadow:0 25px 80px rgba(0,0,0,0.5);}
+.login-logo{text-align:center;margin-bottom:28px;}
+.login-logo h1{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.login-logo p{font-size:0.82rem;color:var(--muted);margin-top:4px;}
+.login-form{display:flex;flex-direction:column;gap:14px;}
+.login-form label{font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:2px;}
+.login-form input{padding:12px 16px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.95rem;color:var(--text);outline:none;transition:border-color 0.2s;width:100%;}
+.login-form input:focus{border-color:var(--accent);}
+.login-btn{padding:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;transition:opacity 0.2s;margin-top:4px;}
+.login-btn:hover{opacity:0.9;}
+.login-error{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);color:#f87171;padding:10px 14px;border-radius:8px;font-size:0.82rem;text-align:center;display:none;}
+
+/* ── APP ── */
+#app{display:none;}
+.app-wrap{display:flex;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:230px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform 0.3s;}
+.sidebar-logo{padding:20px;border-bottom:1px solid var(--border);}
+.sidebar-logo h1{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.sidebar-logo p{font-size:0.68rem;color:var(--muted);margin-top:2px;}
+.nav-section{padding:14px 12px 6px;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;margin:2px 8px;color:var(--muted);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:1px solid transparent;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(79,110,247,0.15);color:#a5b4fc;border-color:rgba(79,110,247,0.25);}
+.nav-icon{font-size:1rem;width:20px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--orange);color:#fff;border-radius:100px;padding:1px 7px;font-size:0.62rem;font-weight:700;}
+.sidebar-bottom{margin-top:auto;padding:14px;border-top:1px solid var(--border);}
+.user-info{background:var(--surface2);border-radius:10px;padding:10px 12px;border:1px solid var(--border);margin-bottom:8px;}
+.user-name{font-size:0.82rem;font-weight:700;}
+.user-role{font-size:0.68rem;color:var(--muted);margin-top:2px;}
+.logout-btn{width:100%;padding:8px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.2);color:#f87171;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.logout-btn:hover{background:var(--red);color:#fff;}
+
+/* ── TOPBAR ── */
+.main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.hamburger{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:4px;background:none;border:none;}
+.hamburger span{width:20px;height:2px;background:var(--muted);border-radius:2px;display:block;}
+.topbar-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;}
+.topbar-right{display:flex;gap:8px;align-items:center;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--accent3);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* ── BUTTONS ── */
+.btn{padding:8px 16px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.82rem;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:5px;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 14px var(--glow);}
+.btn-primary:hover{opacity:0.9;}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--text);}
+.btn-sm{padding:5px 10px;font-size:0.75rem;}
+.btn-danger{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.2);}
+.btn-danger:hover{background:var(--red);color:#fff;}
+.btn-green{background:rgba(6,214,160,0.15);color:var(--accent3);border:1px solid rgba(6,214,160,0.2);}
+.btn-excel{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.2);}
+.btn-excel:hover{background:#22c55e;color:#fff;}
+
+/* ── PAGES ── */
+.page{display:none;padding:20px 24px;animation:fadeIn 0.25s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── KPI ── */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.kpi-label{font-size:0.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
+.kpi-val{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;line-height:1;}
+.kpi-val.blue{color:#7aa3ff;}.kpi-val.green{color:var(--accent3);}.kpi-val.orange{color:var(--orange);}.kpi-val.purple{color:#a78bfa;}.kpi-val.red{color:var(--red);}
+.kpi-sub{font-size:0.68rem;color:var(--muted);margin-top:4px;}
+
+/* ── CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.card-title{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:700;}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;min-width:600px;}
+thead tr{background:var(--surface2);}
+th{padding:10px 14px;text-align:left;font-size:0.67rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}
+tbody tr:hover{background:var(--surface2);}
+tbody tr:last-child{border:none;}
+td{padding:11px 14px;font-size:0.83rem;vertical-align:middle;}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:100px;font-size:0.68rem;font-weight:700;}
+.badge-hot{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
+.badge-warm{background:rgba(249,115,22,0.15);color:#fb923c;border:1px solid rgba(249,115,22,0.2);}
+.badge-cold{background:rgba(96,165,250,0.15);color:#60a5fa;border:1px solid rgba(96,165,250,0.2);}
+.badge-called{background:rgba(6,214,160,0.12);color:var(--accent3);border:1px solid rgba(6,214,160,0.2);}
+.badge-interested{background:rgba(79,110,247,0.15);color:#a5b4fc;border:1px solid rgba(79,110,247,0.2);}
+.badge-notint{background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
+.badge-followup{background:rgba(234,179,8,0.15);color:#fbbf24;border:1px solid rgba(234,179,8,0.2);}
+.badge-new{background:rgba(167,139,250,0.15);color:#c4b5fd;border:1px solid rgba(167,139,250,0.2);}
+.badge-converted{background:rgba(6,214,160,0.15);color:var(--accent3);border:1px solid rgba(6,214,160,0.2);}
+.source-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;}
+.src-whatsapp{background:rgba(37,211,102,0.12);color:#25d366;}
+.src-facebook{background:rgba(74,144,226,0.12);color:#4a90e2;}
+.src-instagram{background:rgba(225,48,108,0.12);color:#e1306c;}
+.src-manual{background:rgba(139,139,139,0.12);color:#9ca3af;}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:24px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;box-shadow:0 25px 80px rgba(0,0,0,0.6);animation:modalIn 0.25s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:18px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;}
+input,select,textarea{padding:10px 13px;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none;transition:border-color 0.2s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+select option{background:var(--surface2);}
+textarea{resize:vertical;min-height:70px;}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--border);}
+
+/* ── TOOLBAR ── */
+.toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.search-inp{flex:1;min-width:160px;padding:9px 14px;background:var(--surface);border:1px solid var(--border2);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--text);outline:none;}
+.search-inp:focus{border-color:var(--accent);}
+.filter-sel{padding:9px 12px;background:var(--surface);border:1px solid var(--border2);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:0.8rem;color:var(--text);outline:none;cursor:pointer;}
+.filter-sel option{background:var(--surface2);}
+
+/* ── STAFF CARDS ── */
+.staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.staff-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;transition:border-color 0.2s;}
+.staff-card:hover{border-color:var(--accent);}
+.staff-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.staff-avatar{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;flex-shrink:0;}
+.staff-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.sstat{background:var(--surface2);border-radius:8px;padding:8px;text-align:center;}
+.sstat-val{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;}
+.sstat-label{font-size:0.62rem;color:var(--muted);margin-top:2px;}
+.progress-bar{height:4px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 0.6s;}
+
+/* ── PERF ── */
+.perf-rank{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:0.8rem;}
+.rank-1{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;}
+.rank-2{background:linear-gradient(135deg,#94a3b8,#64748b);color:#fff;}
+.rank-3{background:linear-gradient(135deg,#cd7c3a,#b45309);color:#fff;}
+.rank-other{background:var(--surface2);color:var(--muted);}
+
+/* ── DASHBOARD ── */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* ── WA TEMPLATE MODAL ── */
+.wa-template{background:var(--surface2);border:1px solid rgba(37,211,102,0.2);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;position:relative;}
+.wa-template:hover{border-color:#25d366;background:rgba(37,211,102,0.06);}
+.wa-template-title{font-size:0.82rem;font-weight:700;color:#25d366;margin-bottom:4px;}
+.wa-template-body{font-size:0.78rem;color:var(--muted);line-height:1.5;}
+.wa-template-use{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:#25d366;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.report-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;}
+.report-card h4{font-size:0.85rem;font-weight:700;margin-bottom:10px;color:var(--accent);}
+/* ── QUICK ADD ── */
+.quick-add-btn{position:fixed;bottom:24px;right:24px;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;font-size:1.6rem;cursor:pointer;box-shadow:0 6px 24px rgba(37,211,102,0.5);z-index:150;transition:transform 0.2s;display:flex;align-items:center;justify-content:center;}
+.quick-add-btn:hover{transform:scale(1.1);}
+.quick-add-btn .tooltip{position:absolute;right:68px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:6px 12px;border-radius:8px;font-size:0.78rem;font-weight:600;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.2s;font-family:'DM Sans',sans-serif;}
+.quick-add-btn:hover .tooltip{opacity:1;}
+.quick-modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:380px;box-shadow:0 25px 80px rgba(0,0,0,0.6);animation:modalIn 0.25s ease;}
+.quick-modal .modal-title{font-size:1rem;margin-bottom:6px;}
+.quick-modal .subtitle{font-size:0.78rem;color:var(--muted);margin-bottom:18px;}
+.quick-fields{display:flex;flex-direction:column;gap:12px;}
+.quick-field label{font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;display:block;margin-bottom:5px;}
+.quick-field input,.quick-field select{width:100%;padding:11px 14px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.92rem;color:var(--text);outline:none;transition:border-color 0.2s;}
+.quick-field input:focus,.quick-field select:focus{border-color:#25d366;}
+.quick-source-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(37,211,102,0.12);color:#25d366;border:1px solid rgba(37,211,102,0.25);font-size:0.8rem;font-weight:600;margin-bottom:14px;}
+.quick-save-btn{width:100%;padding:13px;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;margin-top:6px;transition:opacity 0.2s;}
+.quick-save-btn:hover{opacity:0.9;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:10px 18px;border-radius:10px;font-size:0.83rem;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,0.4);transform:translateY(80px);opacity:0;transition:all 0.3s;z-index:400;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* ── EMPTY ── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-state .ei{font-size:2.2rem;margin-bottom:8px;}
+.empty-state p{font-size:0.85rem;}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-230px);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .hamburger{display:flex!important;}
+  .kpi-row{grid-template-columns:repeat(2,1fr);}
+  .dash-grid{grid-template-columns:1fr;}
+  .form-grid{grid-template-columns:1fr;}
+  .page{padding:14px 14px;}
+  .topbar{padding:10px 14px;}
+  .staff-grid{grid-template-columns:1fr;}
+  table{min-width:500px;}
+}
+.overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90;}
+.overlay-bg.open{display:block;}
+
+/* ── ADD STAFF SECTION ── */
+.add-user-form{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+.add-user-form h3{font-family:'Syne',sans-serif;font-size:0.95rem;margin-bottom:14px;color:var(--accent);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <h1>SMT Clinic</h1>
+      <p>Lead & Staff Management CRM</p>
+    </div>
+    <div class="login-form">
+      <div>
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="aapka@email.com" autocomplete="email">
+      </div>
+      <div>
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+      </div>
+      <div class="login-error" id="login-error"></div>
+      <button class="login-btn" onclick="doLogin()">🔐 Login</button>
+    </div>
+    <div style="text-align:center;margin-top:16px;font-size:0.75rem;color:var(--muted);">
+      Admin se login details maangein
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="overlay-bg" id="overlay-bg" onclick="closeSidebar()"></div>
+  <div class="app-wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <h1>SMT Clinic</h1>
+        <p>Lead & Staff CRM</p>
+      </div>
+      <div class="nav-section">Menu</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">🏠</span> Dashboard</div>
+      <div class="nav-item" onclick="showPage('leads',this)">
+        <span class="nav-icon">🎯</span> Leads
+        <span class="nav-badge" id="nb-new" style="display:none">0</span>
+      </div>
+      <div class="nav-item" onclick="showPage('followups',this)">
+        <span class="nav-icon">🔔</span> Follow-ups
+        <span class="nav-badge" id="nb-fup" style="background:var(--yellow);color:#000;display:none">0</span>
+      </div>
+      <div class="nav-item admin-only" onclick="showPage('staff',this)"><span class="nav-icon">👥</span> Staff</div>
+      <div class="nav-item admin-only" onclick="showPage('performance',this)"><span class="nav-icon">📊</span> Performance</div>
+      <div class="nav-item admin-only" onclick="showPage('adduser',this)"><span class="nav-icon">➕</span> Add User</div>
+      <div class="sidebar-bottom">
+        <div class="user-info">
+          <div class="user-name" id="sidebar-username">Loading...</div>
+          <div class="user-role" id="sidebar-role">—</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+          <div>
+            <div class="topbar-title" id="page-title">Dashboard</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="sync-dot" id="sync-dot" title="Live Connected"></div>
+          <span style="font-size:0.72rem;color:var(--accent3)" id="sync-label">Live</span>
+          <button class="btn admin-only" style="background:rgba(37,211,102,0.15);color:#25d366;border:1px solid rgba(37,211,102,0.25)" onclick="showDailyReport()">📊 Report</button>
+          <button class="btn btn-excel admin-only" onclick="exportExcel()">📥 Export</button>
+          <button class="btn btn-primary admin-only" onclick="openModal('modal-lead')">+ Add Lead</button>
+          <button class="btn btn-primary telecaller-only" style="display:none" onclick="openModal('modal-lead')">+ Add Lead</button>
+        </div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="kpi-row">
+          <div class="kpi-card"><div class="kpi-label">Total Leads</div><div class="kpi-val blue" id="k-total">0</div><div class="kpi-sub">All time</div></div>
+          <div class="kpi-card"><div class="kpi-label">Today's Leads</div><div class="kpi-val green" id="k-today">0</div><div class="kpi-sub">New today</div></div>
+          <div class="kpi-card"><div class="kpi-label">Follow-ups Due</div><div class="kpi-val orange" id="k-fup">0</div><div class="kpi-sub">Pending</div></div>
+          <div class="kpi-card"><div class="kpi-label">Interested</div><div class="kpi-val purple" id="k-int">0</div><div class="kpi-sub">Hot prospects</div></div>
+          <div class="kpi-card"><div class="kpi-label">Converted</div><div class="kpi-val green" id="k-conv">0</div><div class="kpi-sub">Closed</div></div>
+        </div>
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-header"><span class="card-title">🎯 Recent Leads</span><span style="font-size:0.72rem;color:var(--accent);cursor:pointer;font-weight:600" onclick="showPage('leads',document.querySelector('[onclick*=leads]'))">All →</span></div>
+            <div id="dash-recent"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">📡 Source Breakdown</span></div>
+            <div style="padding:16px" id="dash-sources"></div>
+          </div>
+        </div>
+        <div class="dash-grid" style="margin-top:14px">
+          <div class="card admin-only">
+            <div class="card-header"><span class="card-title">👥 Team Today</span></div>
+            <div id="dash-team"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">🔔 Follow-up Alerts</span></div>
+            <div id="dash-fups"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEADS -->
+      <div class="page" id="page-leads">
+        <div class="toolbar">
+          <input class="search-inp" id="lead-search" placeholder="🔍 Name, phone ya city..." oninput="renderLeads()" type="search">
+          <select class="filter-sel" id="f-status" onchange="renderLeads()">
+            <option value="">All Status</option>
+            <option>New</option><option>Called</option><option>Interested</option>
+            <option>Not Interested</option><option>Follow-up</option><option>Converted</option>
+          </select>
+          <select class="filter-sel" id="f-quality" onchange="renderLeads()">
+            <option value="">All Quality</option>
+            <option>Hot</option><option>Warm</option><option>Cold</option>
+          </select>
+          <select class="filter-sel" id="f-disease" onchange="renderLeads()">
+            <option value="">All Diseases</option>
+            <option>Najla / Sinusitis</option><option>Asthma</option><option>Back Pain</option>
+            <option>Knee Pain</option><option>Cervical</option><option>Migraine / Headache</option>
+            <option>Paralysis</option><option>Diabetes</option><option>BP / Hypertension</option>
+            <option>Arthritis</option><option>Sciatica</option><option>Frozen Shoulder</option>
+            <option>Slip Disc</option><option>Anxiety / Depression</option><option>Skin Disease</option>
+            <option>Other</option>
+          </select>
+          <select class="filter-sel" id="f-service" onchange="renderLeads()">
+            <option value="">All Services</option>
+            <option>Online</option><option>Offline</option><option>Both</option>
+          </select>
+          <select class="filter-sel admin-only" id="f-source" onchange="renderLeads()">
+            <option value="">All Sources</option>
+            <option>WhatsApp</option><option>Facebook</option><option>Instagram</option><option>Manual</option>
+          </select>
+          <select class="filter-sel admin-only" id="f-staff" onchange="renderLeads()">
+            <option value="">All Staff</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>#</th><th>Lead</th><th>Disease</th><th>Quality</th><th>Source</th>
+                <th>Service</th><th>Assigned</th><th>Status</th><th>Follow-up</th><th>Action</th>
+              </tr></thead>
+              <tbody id="leads-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOLLOW-UPS -->
+      <div class="page" id="page-followups">
+        <div class="toolbar">
+          <select class="filter-sel" id="fup-filter" onchange="renderFollowups()">
+            <option value="all">All</option><option value="overdue">Overdue</option>
+            <option value="today">Today</option><option value="upcoming">Upcoming</option>
+          </select>
+          <select class="filter-sel admin-only" id="fup-staff" onchange="renderFollowups()">
+            <option value="">All Staff</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Lead</th><th>Phone</th><th>Quality</th><th>Assigned</th><th>Date</th><th>Status</th><th>Notes</th><th>Action</th></tr></thead>
+              <tbody id="followup-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAFF -->
+      <div class="page admin-only" id="page-staff">
+        <div class="staff-grid" id="staff-grid">
+          <div class="empty-state"><div class="ei">👥</div><p>No staff yet</p></div>
+        </div>
+      </div>
+
+      <!-- PERFORMANCE -->
+      <div class="page admin-only" id="page-performance">
+        <div class="toolbar">
+          <select class="filter-sel" id="perf-period" onchange="renderPerformance()">
+            <option value="today">Today</option><option value="week">This Week</option>
+            <option value="month">This Month</option><option value="all">All Time</option>
+          </select>
+        </div>
+        <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kpi-card"><div class="kpi-label">Total Calls</div><div class="kpi-val blue" id="p-calls">0</div></div>
+          <div class="kpi-card"><div class="kpi-label">Interested</div><div class="kpi-val purple" id="p-int">0</div></div>
+          <div class="kpi-card"><div class="kpi-label">Converted</div><div class="kpi-val green" id="p-conv">0</div></div>
+          <div class="kpi-card"><div class="kpi-label">Follow-ups</div><div class="kpi-val orange" id="p-fup">0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">🏆 Telecaller Leaderboard</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Rank</th><th>Telecaller</th><th>Assigned</th><th>Called</th><th>Interested</th><th>Converted</th><th>Follow-ups</th><th>Conv%</th></tr></thead>
+              <tbody id="perf-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD USER (Admin only) -->
+      <div class="page admin-only" id="page-adduser">
+        <div class="add-user-form">
+          <h3>➕ Naya User / Telecaller Add Karo</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" id="nu-name" placeholder="Staff name">
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" id="nu-email" placeholder="email@example.com">
+            </div>
+            <div class="form-group">
+              <label>Password *</label>
+              <input type="password" id="nu-password" placeholder="Min 6 characters">
+            </div>
+            <div class="form-group">
+              <label>Phone</label>
+              <input type="tel" id="nu-phone" placeholder="+91 XXXXX XXXXX">
+            </div>
+            <div class="form-group">
+              <label>Role</label>
+              <select id="nu-role">
+                <option value="telecaller">Telecaller</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Daily Call Target</label>
+              <input type="number" id="nu-target" placeholder="30" value="30">
+            </div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary" onclick="createUser()">✅ Create User</button>
+            <span id="user-create-msg" style="font-size:0.82rem;color:var(--accent3)"></span>
+          </div>
+        </div>
+
+        <!-- Existing users list -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">👥 All Users</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Target</th><th>Action</th></tr></thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /app-wrap -->
+</div><!-- /app -->
+
+<!-- ADD LEAD MODAL -->
+<div class="modal-overlay" id="modal-lead">
+  <div class="modal">
+    <div class="modal-title" id="lead-modal-title">🎯 Add New Lead</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Full Name *</label><input type="text" id="l-name" placeholder="Lead name"></div>
+      <div class="form-group"><label>Phone *</label><input type="tel" id="l-phone" placeholder="+91 XXXXX XXXXX"></div>
+      <div class="form-group"><label>Source</label>
+        <select id="l-source"><option value="WhatsApp">📱 WhatsApp</option><option value="Facebook">🔵 Facebook</option><option value="Instagram">📸 Instagram</option><option value="Manual">✍️ Manual</option></select>
+      </div>
+      <div class="form-group"><label>Quality</label>
+        <select id="l-quality"><option value="Hot">🔥 Hot</option><option value="Warm">🌤 Warm</option><option value="Cold">❄️ Cold</option></select>
+      </div>
+      <div class="form-group admin-only"><label>Assign To</label><select id="l-assign"><option value="">-- Unassigned --</option></select></div>
+      <div class="form-group"><label>Status</label>
+        <select id="l-status"><option value="New">New</option><option value="Called">Called</option><option value="Interested">Interested</option><option value="Not Interested">Not Interested</option><option value="Follow-up">Follow-up</option><option value="Converted">Converted</option></select>
+      </div>
+      <div class="form-group"><label>Follow-up Date</label><input type="date" id="l-followup"></div>
+      <div class="form-group"><label>Service Type</label>
+        <select id="l-service">
+          <option value="Online">🌐 Online</option>
+          <option value="Offline">🏥 Offline (Clinic Visit)</option>
+          <option value="Both">🔄 Both</option>
+        </select>
+      </div>
+      <div class="form-group full"><label>Disease / Complaint</label>
+        <select id="l-disease" onchange="toggleOtherDisease()">
+          <option value="">-- Select Disease --</option>
+          <option value="Najla / Sinusitis">🤧 Najla / Sinusitis</option>
+          <option value="Asthma">🫁 Asthma</option>
+          <option value="Back Pain">🦴 Back Pain</option>
+          <option value="Knee Pain">🦵 Knee Pain</option>
+          <option value="Cervical">💆 Cervical</option>
+          <option value="Migraine / Headache">🤕 Migraine / Headache</option>
+          <option value="Paralysis">🧠 Paralysis</option>
+          <option value="Diabetes">💉 Diabetes</option>
+          <option value="BP / Hypertension">❤️ BP / Hypertension</option>
+          <option value="Arthritis">🦴 Arthritis</option>
+          <option value="Sciatica">🦿 Sciatica</option>
+          <option value="Frozen Shoulder">💪 Frozen Shoulder</option>
+          <option value="Slip Disc">🔩 Slip Disc</option>
+          <option value="Anxiety / Depression">🧘 Anxiety / Depression</option>
+          <option value="Skin Disease">🩺 Skin Disease</option>
+          <option value="Other">📋 Other</option>
+        </select>
+      </div>
+      <div class="form-group full" id="other-disease-wrap" style="display:none">
+        <label>Other Disease (specify)</label>
+        <input type="text" id="l-other-disease" placeholder="Disease ka naam likhein...">
+      </div>
+      <div class="form-group"><label>City</label><input type="text" id="l-city" placeholder="e.g. Delhi, Gurgaon..."></div>
+      <div class="form-group"><label>Package / Treatment Interest</label><input type="text" id="l-product" placeholder="e.g. 10 Session Package..."></div>
+      <div class="form-group full"><label>Full Address</label><textarea id="l-address" placeholder="Ghar ka address, mohalla, pincode..." style="min-height:55px"></textarea></div>
+      <div class="form-group full"><label>Notes / Remarks</label><textarea id="l-notes" placeholder="Call notes, patient ki baat..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-lead')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveLead()">Save Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEAD DETAIL MODAL -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal">
+    <div class="modal-title" id="detail-title">Lead Detail</div>
+    <div id="detail-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-detail')">Close</button>
+      <button class="btn btn-primary" onclick="editLeadFromDetail()">✏️ Edit</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- WA MESSAGE TEMPLATE MODAL -->
+<div class="modal-overlay" id="modal-wa-template">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-title">💬 WhatsApp Message Bhejo</div>
+    <div id="wa-patient-info" style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:16px;font-size:0.85rem;"></div>
+    <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;">Template Select Karo:</div>
+    <div id="wa-templates-list"></div>
+    <div style="margin-top:14px;">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">Ya Custom Message:</div>
+      <textarea id="wa-custom-msg" style="width:100%;padding:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--text);outline:none;min-height:80px;resize:vertical;" placeholder="Apna message likhein..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-wa-template')">Cancel</button>
+      <a id="wa-send-btn" href="#" target="_blank" class="btn" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;text-decoration:none" onclick="closeModal('modal-wa-template')">📤 WhatsApp pe Bhejo</a>
+    </div>
+  </div>
+</div>
+
+<!-- DAILY REPORT MODAL -->
+<div class="modal-overlay" id="modal-report">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-title">📊 Daily Summary Report</div>
+    <div id="report-content"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-report')">Close</button>
+      <a id="report-wa-btn" href="#" target="_blank" class="btn" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;text-decoration:none">📤 WhatsApp pe Share Karo</a>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK ADD FLOATING BUTTON -->
+<button class="quick-add-btn" onclick="openQuickAdd()" id="quick-fab" style="display:none">
+  📱
+  <span class="tooltip">WhatsApp Lead Add</span>
+</button>
+
+<!-- QUICK ADD MODAL -->
+<div class="modal-overlay" id="modal-quick">
+  <div class="quick-modal">
+    <div class="modal-title">⚡ Quick Lead Add</div>
+    <div class="subtitle">WhatsApp se aai lead — 30 second mein save karo!</div>
+    <div class="quick-source-tag">📱 Source: WhatsApp</div>
+    <div class="quick-fields">
+      <div class="quick-field">
+        <label>Patient Name *</label>
+        <input type="text" id="q-name" placeholder="Naam likhein..." autocomplete="off">
+      </div>
+      <div class="quick-field">
+        <label>Phone Number *</label>
+        <input type="tel" id="q-phone" placeholder="+91 XXXXX XXXXX">
+      </div>
+      <div class="quick-field">
+        <label>Disease / Complaint</label>
+        <select id="q-disease">
+          <option value="">-- Select --</option>
+          <option value="Najla / Sinusitis">🤧 Najla / Sinusitis</option>
+          <option value="Asthma">🫁 Asthma</option>
+          <option value="Back Pain">🦴 Back Pain</option>
+          <option value="Knee Pain">🦵 Knee Pain</option>
+          <option value="Cervical">💆 Cervical</option>
+          <option value="Migraine / Headache">🤕 Migraine / Headache</option>
+          <option value="Paralysis">🧠 Paralysis</option>
+          <option value="Diabetes">💉 Diabetes</option>
+          <option value="BP / Hypertension">❤️ BP / Hypertension</option>
+          <option value="Arthritis">🦴 Arthritis</option>
+          <option value="Sciatica">🦿 Sciatica</option>
+          <option value="Frozen Shoulder">💪 Frozen Shoulder</option>
+          <option value="Slip Disc">🔩 Slip Disc</option>
+          <option value="Anxiety / Depression">🧘 Anxiety / Depression</option>
+          <option value="Skin Disease">🩺 Skin Disease</option>
+          <option value="Other">📋 Other</option>
+        </select>
+      </div>
+      <div class="quick-field">
+        <label>Service Type</label>
+        <select id="q-service">
+          <option value="Online">🌐 Online</option>
+          <option value="Offline">🏥 Offline</option>
+          <option value="Both">🔄 Both</option>
+        </select>
+      </div>
+      <div class="quick-field">
+        <label>City</label>
+        <input type="text" id="q-city" placeholder="e.g. Delhi, Gurgaon...">
+      </div>
+      <div class="quick-field">
+        <label>Lead Quality</label>
+        <select id="q-quality">
+          <option value="Hot">🔥 Hot</option>
+          <option value="Warm">🌤 Warm</option>
+          <option value="Cold">❄️ Cold</option>
+        </select>
+      </div>
+    </div>
+    <button class="quick-save-btn" onclick="saveQuickLead()">✅ Save Lead</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px;justify-content:center" onclick="closeModal('modal-quick')">Cancel</button>
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, deleteDoc, getDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBh6r5F8nDqc7M3EjZTv319k-1fbvz3Bv4",
+  authDomain: "smt-clinic-35a4f.firebaseapp.com",
+  projectId: "smt-clinic-35a4f",
+  storageBucket: "smt-clinic-35a4f.firebasestorage.app",
+  messagingSenderId: "1062738433560",
+  appId: "1:1062738433560:web:56fe5742b912019623d56d"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const COLORS = ['#4f6ef7','#7c3aed','#06d6a0','#f97316','#ef4444','#eab308','#ec4899','#14b8a6'];
+
+// ── STATE ──
+let leads = [];
+let staff = [];
+let currentUser = null;
+let currentRole = null;
+let editingLeadId = null;
+let detailLeadId = null;
+
+// ── AUTH STATE ──
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      currentRole = data.role || 'telecaller';
+      document.getElementById('sidebar-username').textContent = data.name || user.email;
+      document.getElementById('quick-fab').style.display='flex';
+      const btn = document.querySelector('.login-btn');
+      if(btn) { btn.textContent = '🔐 Login'; btn.disabled = false; }
+      document.getElementById('sidebar-role').textContent = currentRole === 'admin' ? '👑 Admin' : '📞 Telecaller';
+      applyRoleUI();
+      startListeners();
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+    } else {
+      // First time admin setup
+      await setDoc(doc(db, 'users', user.uid), {name: 'Admin', email: user.email, role: 'admin', target: 50, createdAt: new Date().toISOString()});
+      location.reload();
+    }
+  } else {
+    currentUser = null;
+    currentRole = null;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+// ── APPLY ROLE UI ──
+function applyRoleUI() {
+  const isAdmin = currentRole === 'admin';
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.style.display = isAdmin ? '' : 'none';
+  });
+  document.querySelectorAll('.telecaller-only').forEach(el => {
+    el.style.display = !isAdmin ? '' : 'none';
+  });
+}
+
+// ── LOGIN ──
+window.doLogin = async function() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  const btn = document.querySelector('.login-btn');
+  errEl.style.display = 'none';
+  if (!email || !pass) { 
+    errEl.textContent = '❌ Email aur password daalein'; 
+    errEl.style.display = 'block'; 
+    return; 
+  }
+  btn.textContent = '⏳ Login ho raha hai...';
+  btn.disabled = true;
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    console.error('Login error:', e.code, e.message);
+    btn.textContent = '🔐 Login';
+    btn.disabled = false;
+    if(e.code === 'auth/user-not-found') {
+      errEl.textContent = '❌ Yeh email registered nahi hai!';
+    } else if(e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+      errEl.textContent = '❌ Password galat hai!';
+    } else if(e.code === 'auth/invalid-email') {
+      errEl.textContent = '❌ Email format galat hai!';
+    } else if(e.code === 'auth/network-request-failed') {
+      errEl.textContent = '❌ Internet connection check karein!';
+    } else if(e.code === 'auth/too-many-requests') {
+      errEl.textContent = '❌ Bahut zyada attempts! Thodi der baad try karein.';
+    } else {
+      errEl.textContent = '❌ Error: ' + e.message;
+    }
+    errEl.style.display = 'block';
+  }
+};
+
+// Enter key login
+document.getElementById('login-password').addEventListener('keypress', e => { if(e.key==='Enter') window.doLogin(); });
+
+// ── LOGOUT ──
+window.doLogout = async function() {
+  document.getElementById('quick-fab').style.display='none';
+  await signOut(auth);
+  showToast('👋 Logged out!');
+};
+
+// ── CREATE USER ──
+window.createUser = async function() {
+  const name = document.getElementById('nu-name').value.trim();
+  const email = document.getElementById('nu-email').value.trim();
+  const pass = document.getElementById('nu-password').value;
+  const phone = document.getElementById('nu-phone').value.trim();
+  const role = document.getElementById('nu-role').value;
+  const target = parseInt(document.getElementById('nu-target').value) || 30;
+  const msgEl = document.getElementById('user-create-msg');
+  if (!name || !email || !pass) { msgEl.textContent = '❌ Name, email aur password required!'; msgEl.style.color='var(--red)'; return; }
+  msgEl.textContent = '⏳ Creating...'; msgEl.style.color='var(--yellow)';
+  try {
+    const res = await createUserWithEmailAndPassword(auth, email, pass);
+    const color = COLORS[staff.length % COLORS.length];
+    await setDoc(doc(db, 'users', res.user.uid), {
+      id: res.user.uid, name, email, phone, role, target, color,
+      createdAt: new Date().toISOString()
+    });
+    // Also add to staff collection for CRM tracking
+    await setDoc(doc(db, 'staff', res.user.uid), {
+      id: res.user.uid, name, email, phone, role, target, color,
+      createdAt: new Date().toISOString()
+    });
+    msgEl.textContent = `✅ ${name} ka account ban gaya!`; msgEl.style.color='var(--accent3)';
+    document.getElementById('nu-name').value='';
+    document.getElementById('nu-email').value='';
+    document.getElementById('nu-password').value='';
+    document.getElementById('nu-phone').value='';
+    showToast('✅ User created!');
+    await signInWithEmailAndPassword(auth, firebaseConfig.apiKey, ''); // keep admin logged in
+  } catch(e) {
+    if(e.code === 'auth/email-already-in-use') msgEl.textContent = '❌ Yeh email pehle se registered hai!';
+    else msgEl.textContent = '❌ ' + e.message;
+    msgEl.style.color='var(--red)';
+  }
+};
+
+// ── REAL-TIME LISTENERS ──
+function startListeners() {
+  setSyncStatus('connecting');
+
+  // Leads listener
+  onSnapshot(collection(db, 'leads'), (snap) => {
+    leads = snap.docs.map(d => d.data());
+    leads.sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+    // Telecaller sees only their leads
+    if (currentRole !== 'admin') {
+      leads = leads.filter(l => l.assignedTo === currentUser.uid);
+    }
+    updateAll();
+    const ap = document.querySelector('.page.active');
+    if(ap) {
+      if(ap.id==='page-leads') renderLeads();
+      if(ap.id==='page-followups') renderFollowups();
+      if(ap.id==='page-performance') renderPerformance();
+    }
+    setSyncStatus('live');
+  });
+
+  // Staff listener
+  onSnapshot(collection(db, 'staff'), (snap) => {
+    staff = snap.docs.map(d => d.data());
+    if(document.getElementById('page-staff').classList.contains('active')) renderStaff();
+    if(document.getElementById('page-adduser').classList.contains('active')) renderUsers();
+    renderStaff();
+    updateAll();
+  });
+}
+
+function setSyncStatus(s) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if(s==='live'){dot.style.background='var(--accent3)';lbl.textContent='🟢 Live';lbl.style.color='var(--accent3)';}
+  else if(s==='connecting'){dot.style.background='var(--yellow)';lbl.textContent='⏳ Connecting';lbl.style.color='var(--yellow)';}
+  else{dot.style.background='var(--red)';lbl.textContent='❌ Offline';lbl.style.color='var(--red)';}
+}
+
+// ── SAVE LEAD ──
+window.saveLead = async function() {
+  const name = document.getElementById('l-name').value.trim();
+  const phone = document.getElementById('l-phone').value.trim();
+  if(!name||!phone){showToast('❌ Name aur phone required!');return;}
+  const assignId = currentRole==='admin' ? document.getElementById('l-assign').value : currentUser.uid;
+  const assignedS = staff.find(s=>s.id===assignId);
+  const data = {
+    id: editingLeadId || Date.now().toString(),
+    name, phone,
+    source: document.getElementById('l-source').value,
+    quality: document.getElementById('l-quality').value,
+    status: document.getElementById('l-status').value,
+    followupDate: document.getElementById('l-followup').value,
+    product: document.getElementById('l-product').value,
+    notes: document.getElementById('l-notes').value,
+    disease: document.getElementById('l-disease').value==='Other' ? (document.getElementById('l-other-disease').value||'Other') : document.getElementById('l-disease').value,
+    serviceType: document.getElementById('l-service').value,
+    city: document.getElementById('l-city').value,
+    address: document.getElementById('l-address').value,
+    assignedTo: assignId||'',
+    assignedName: assignedS?assignedS.name:(currentRole!=='admin'?document.getElementById('sidebar-username').textContent:'Unassigned'),
+    createdAt: editingLeadId?(leads.find(x=>x.id===editingLeadId)||{}).createdAt:new Date().toISOString(),
+    lastCalledDate: editingLeadId?(leads.find(x=>x.id===editingLeadId)||{}).lastCalledDate:null,
+    createdBy: currentUser.uid,
+  };
+  if(data.status==='Called') data.lastCalledDate = todayStr();
+  try {
+    await setDoc(doc(db,'leads',data.id), data);
+    showToast(editingLeadId?'✅ Lead updated!':'✅ Lead added!');
+    closeModal('modal-lead');
+  } catch(e){showToast('❌ Save failed!');}
+};
+
+// ── DELETE LEAD ──
+window.deleteLead = async function(id) {
+  if(!confirm('Delete this lead?')) return;
+  try { await deleteDoc(doc(db,'leads',id)); showToast('🗑️ Deleted'); } catch(e){}
+};
+
+// ── QUICK STATUS ──
+window.quickStatus = async function(id, status) {
+  const l = leads.find(x=>x.id===id); if(!l) return;
+  l.status = status;
+  if(status==='Called') l.lastCalledDate = todayStr();
+  try { await setDoc(doc(db,'leads',id),l); showToast(`✅ ${status}`); closeModal('modal-detail'); } catch(e){}
+};
+
+// ── DELETE STAFF ──
+window.deleteStaff = async function(id) {
+  if(!confirm('Delete this staff?')) return;
+  try { await deleteDoc(doc(db,'staff',id)); showToast('🗑️ Staff removed'); } catch(e){}
+};
+
+// ── EXCEL EXPORT ──
+window.exportExcel = function() {
+  let csv = 'Name,Phone,Disease,Service Type,City,Source,Quality,Status,Assigned To,Follow-up Date,Package,Address,Notes,Added On\n';
+  leads.forEach(l => {
+    csv += `"${l.name}","${l.phone}","${l.disease||''}","${l.serviceType||''}","${l.city||''}","${l.source||''}","${l.quality||''}","${l.status||''}","${l.assignedName||''}","${l.followupDate||''}","${l.product||''}","${(l.address||'').replace(/"/g,"'")}","${(l.notes||'').replace(/"/g,"'")}","${l.createdAt?l.createdAt.split('T')[0]:''}"\n`;
+  });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`SMT_Clinic_Leads_${todayStr()}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('📥 Excel download ho rahi hai!');
+};
+
+// ── RENDER USERS ──
+function renderUsers() {
+  const tbody = document.getElementById('users-tbody');
+  if(!staff.length){tbody.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="ei">👥</div><p>No users yet</p></div></td></tr>';return;}
+  tbody.innerHTML = staff.map(s=>`
+    <tr>
+      <td><div style="font-weight:700">${s.name}</div></td>
+      <td style="color:var(--muted);font-size:0.8rem">${s.email||'—'}</td>
+      <td style="color:var(--muted);font-size:0.8rem">${s.phone||'—'}</td>
+      <td><span class="badge ${s.role==='admin'?'badge-interested':'badge-called'}">${s.role==='admin'?'👑 Admin':'📞 Telecaller'}</span></td>
+      <td style="font-size:0.82rem">${s.target||30} calls/day</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteStaff('${s.id}')">🗑</button></td>
+    </tr>`).join('');
+}
+
+// ── NAVIGATION ──
+window.showPage = function(name, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(el) el.classList.add('active');
+  const titles={dashboard:'Dashboard',leads:'All Leads',followups:'Follow-ups',staff:'Staff',performance:'Performance',adduser:'Add User'};
+  document.getElementById('page-title').textContent = titles[name]||name;
+  if(name==='leads'){populateAssignFilter('f-staff');populateAssignFilter('fup-staff');renderLeads();}
+  if(name==='followups'){populateAssignFilter('fup-staff');renderFollowups();}
+  if(name==='staff') renderStaff();
+  if(name==='performance') renderPerformance();
+  if(name==='adduser') renderUsers();
+  closeSidebar();
+};
+
+window.toggleSidebar = function(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay-bg').classList.toggle('open');
+};
+window.closeSidebar = function(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay-bg').classList.remove('open');
+};
+
+// ── LEAD MODAL ──
+window.openModal = function(id) {
+  if(id==='modal-lead'){
+    editingLeadId=null;
+    document.getElementById('lead-modal-title').textContent='🎯 Add New Lead';
+    ['l-name','l-phone','l-product','l-notes'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('l-source').value='WhatsApp';
+    document.getElementById('l-quality').value='Hot';
+    document.getElementById('l-status').value='New';
+    document.getElementById('l-followup').value='';
+    document.getElementById('l-disease').value='';
+    document.getElementById('l-other-disease').value='';
+    document.getElementById('l-service').value='Online';
+    document.getElementById('l-city').value='';
+    document.getElementById('l-address').value='';
+    document.getElementById('other-disease-wrap').style.display='none';
+    populateAssignDropdown();
+  }
+  document.getElementById(id).classList.add('open');
+};
+
+window.openEditLead = function(id) {
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  editingLeadId=id;
+  document.getElementById('lead-modal-title').textContent='✏️ Edit Lead';
+  document.getElementById('l-name').value=l.name;
+  document.getElementById('l-phone').value=l.phone;
+  document.getElementById('l-source').value=l.source||'Manual';
+  document.getElementById('l-quality').value=l.quality||'Warm';
+  document.getElementById('l-status').value=l.status;
+  document.getElementById('l-followup').value=l.followupDate||'';
+  document.getElementById('l-product').value=l.product||'';
+  document.getElementById('l-notes').value=l.notes||'';
+  document.getElementById('l-disease').value=l.disease||'';
+  document.getElementById('l-service').value=l.serviceType||'Online';
+  document.getElementById('l-city').value=l.city||'';
+  document.getElementById('l-address').value=l.address||'';
+  document.getElementById('l-other-disease').value='';
+  document.getElementById('other-disease-wrap').style.display=(l.disease&&!['Najla / Sinusitis','Asthma','Back Pain','Knee Pain','Cervical','Migraine / Headache','Paralysis','Diabetes','BP / Hypertension','Arthritis','Sciatica','Frozen Shoulder','Slip Disc','Anxiety / Depression','Skin Disease'].includes(l.disease))?'block':'none';
+  populateAssignDropdown();
+  const assignEl=document.getElementById('l-assign');
+  if(assignEl) assignEl.value=l.assignedTo||'';
+  closeModal('modal-detail');
+  document.getElementById('modal-lead').classList.add('open');
+};
+
+window.editLeadFromDetail = function(){window.openEditLead(detailLeadId);};
+
+function populateAssignDropdown(){
+  const sel=document.getElementById('l-assign');
+  if(!sel) return;
+  sel.innerHTML='<option value="">-- Unassigned --</option>'+staff.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+function populateAssignFilter(elId){
+  const sel=document.getElementById(elId);
+  if(!sel) return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">All Staff</option>'+staff.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  sel.value=cur;
+}
+
+// ── VIEW DETAIL ──
+window.viewDetail = function(id) {
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  detailLeadId=id;
+  document.getElementById('detail-title').textContent='🎯 '+l.name;
+  document.getElementById('detail-body').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div><div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Phone</div><div style="font-weight:600">${l.phone}</div></div>
+      <div><div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Source</div>${srcTag(l.source)}</div>
+      <div><div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Quality</div>${qualBadge(l.quality)}</div>
+      <div><div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Status</div>${statusBadge(l.status)}</div>
+      <div><div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Assigned</div><div style="font-weight:600">${l.assignedName||'Unassigned'}</div></div>
+      <div><div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Follow-up</div><div style="font-weight:600">${l.followupDate?fmtDate(l.followupDate):'—'}</div></div>
+      <div><div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Disease</div><div style="font-weight:600">${l.disease||'—'}</div></div>
+      <div><div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Service Type</div><div style="font-weight:600">${l.serviceType||'—'}</div></div>
+      <div><div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">City</div><div style="font-weight:600">${l.city||'—'}</div></div>
+    </div>
+    ${l.address?`<div style="margin-bottom:10px;background:var(--surface2);border-radius:8px;padding:10px;font-size:0.83rem"><strong>📍 Address:</strong> ${l.address}</div>`:''}
+    ${l.product?`<div style="margin-bottom:10px;font-size:0.85rem"><strong>Package:</strong> ${l.product}</div>`:''}
+    ${l.notes?`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.83rem;color:var(--muted);line-height:1.6;margin-bottom:14px"><strong style="color:var(--text)">📝 Notes:</strong><br>${l.notes}</div>`:''}
+    <div style="font-size:0.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Quick Status</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+      ${['Called','Interested','Not Interested','Follow-up','Converted'].map(s=>`<button class="btn btn-ghost btn-sm" onclick="quickStatus('${l.id}','${s}')">${s}</button>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <a href="https://wa.me/${l.phone.replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-sm" style="background:rgba(37,211,102,0.15);color:#25d366;border:1px solid rgba(37,211,102,0.25);text-decoration:none">💬 WhatsApp Open Karo</a>
+      <button class="btn btn-sm" style="background:rgba(37,211,102,0.15);color:#25d366;border:1px solid rgba(37,211,102,0.25)" onclick="openWATemplate('${l.id}')">📤 Message Template Bhejo</button>
+    </div>`;
+  document.getElementById('modal-detail').classList.add('open');
+};
+
+// ── RENDER LEADS ──
+function renderLeads(){
+  const search=(document.getElementById('lead-search').value||'').toLowerCase();
+  const fS=document.getElementById('f-status').value;
+  const fQ=document.getElementById('f-quality').value;
+  const fSrc=currentRole==='admin'?(document.getElementById('f-source').value||''):'';
+  const fDisease=(document.getElementById('f-disease').value||'');
+  const fService=(document.getElementById('f-service').value||'');
+  const fSt=currentRole==='admin'?(document.getElementById('f-staff').value||''):'';
+  let list=leads.filter(l=>{
+    const phoneClean = l.phone.replace(/[\s\-+]/g,'');
+    const searchClean = search.replace(/[\s\-+]/g,'');
+    const matchSearch = !search||(
+      l.name.toLowerCase().includes(search)||
+      phoneClean.includes(searchClean)||
+      (l.city||'').toLowerCase().includes(search)||
+      (l.disease||'').toLowerCase().includes(search)
+    );
+    return matchSearch
+      &&(!fS||l.status===fS)&&(!fQ||l.quality===fQ)
+      &&(!fSrc||l.source===fSrc)&&(!fSt||l.assignedTo===fSt)&&(!fDisease||l.disease===fDisease)&&(!fService||l.serviceType===fService);
+  });
+  const tbody=document.getElementById('leads-tbody');
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><div class="ei">🎯</div><p>No leads found</p></div></td></tr>`;return;}
+  tbody.innerHTML=list.map((l,i)=>`
+    <tr>
+      <td style="color:var(--muted);font-size:0.75rem">${i+1}</td>
+      <td><div style="font-weight:700;font-size:0.88rem">${l.name}</div><div style="font-size:0.73rem;color:var(--muted)">${l.phone}</div>${l.city?`<div style="font-size:0.7rem;color:var(--muted)">📍 ${l.city}</div>`:''}</td>
+      <td style="font-size:0.8rem;color:#a78bfa">${l.disease||'—'}</td>
+      <td>${qualBadge(l.quality)}</td>
+      <td>${srcTag(l.source)}</td>
+      <td><span style="font-size:0.75rem;font-weight:600;color:${l.serviceType==='Online'?'#60a5fa':l.serviceType==='Offline'?'#fb923c':'#a78bfa'}">${l.serviceType==='Online'?'🌐':l.serviceType==='Offline'?'🏥':'🔄'} ${l.serviceType||'—'}</span></td>
+      <td style="font-size:0.82rem">${l.assignedName||'—'}</td>
+      <td>${statusBadge(l.status)}</td>
+      <td style="font-size:0.75rem;${l.followupDate&&l.followupDate<todayStr()?'color:#f87171;font-weight:700':l.followupDate===todayStr()?'color:#fbbf24;font-weight:700':'color:var(--muted)'}">${l.followupDate?fmtDate(l.followupDate):'—'}</td>
+      <td><div style="display:flex;gap:4px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="viewDetail('${l.id}')">👁</button><button class="btn btn-ghost btn-sm" onclick="openEditLead('${l.id}')">✏️</button><a href="https://wa.me/${l.phone.replace(/[^0-9]/g,'')}" target="_blank" class="btn btn-sm" style="background:rgba(37,211,102,0.15);color:#25d366;border:1px solid rgba(37,211,102,0.25);text-decoration:none">💬</a>${currentRole==='admin'?`<button class="btn btn-danger btn-sm" onclick="deleteLead('${l.id}')">🗑</button>`:''}</div></td>
+    </tr>`).join('');
+}
+
+// ── RENDER FOLLOWUPS ──
+function renderFollowups(){
+  const today=todayStr();
+  const fFilter=document.getElementById('fup-filter').value;
+  const fSt=currentRole==='admin'?(document.getElementById('fup-staff').value||''):'';
+  let list=leads.filter(l=>l.followupDate);
+  if(fFilter==='overdue') list=list.filter(l=>l.followupDate<today);
+  else if(fFilter==='today') list=list.filter(l=>l.followupDate===today);
+  else if(fFilter==='upcoming') list=list.filter(l=>l.followupDate>today);
+  if(fSt) list=list.filter(l=>l.assignedTo===fSt);
+  list.sort((a,b)=>a.followupDate.localeCompare(b.followupDate));
+  const tbody=document.getElementById('followup-tbody');
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><div class="ei">🔔</div><p>No follow-ups</p></div></td></tr>`;return;}
+  tbody.innerHTML=list.map(l=>{
+    const isOv=l.followupDate<today,isTd=l.followupDate===today;
+    return `<tr>
+      <td><div style="font-weight:700">${l.name}</div></td>
+      <td style="color:var(--muted);font-size:0.8rem">${l.phone}</td>
+      <td>${qualBadge(l.quality)}</td>
+      <td style="font-size:0.82rem">${l.assignedName||'—'}</td>
+      <td><span style="${isOv?'color:#f87171;font-weight:700':isTd?'color:#fbbf24;font-weight:700':'color:var(--muted)'}">${fmtDate(l.followupDate)}</span><br><span style="font-size:0.65rem;color:var(--muted)">${isOv?'⚠️ Overdue':isTd?'📍 Today':'🗓 Upcoming'}</span></td>
+      <td>${statusBadge(l.status)}</td>
+      <td style="font-size:0.75rem;color:var(--muted);max-width:120px">${l.notes||'—'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="openEditLead('${l.id}')">✏️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── RENDER STAFF ──
+function renderStaff(){
+  const grid=document.getElementById('staff-grid');
+  if(!grid) return;
+  const today=todayStr();
+  if(!staff.length){grid.innerHTML='<div class="empty-state"><div class="ei">👥</div><p>No staff yet. "Add User" se add karo.</p></div>';return;}
+  grid.innerHTML=staff.map(s=>{
+    const myLeads=leads.filter(l=>l.assignedTo===s.id);
+    const todayCalled=myLeads.filter(l=>l.lastCalledDate===today).length;
+    const interested=myLeads.filter(l=>l.status==='Interested').length;
+    const converted=myLeads.filter(l=>l.status==='Converted').length;
+    const pct=s.target?Math.min(100,Math.round(todayCalled/s.target*100)):0;
+    return `<div class="staff-card">
+      <div class="staff-head">
+        <div class="staff-avatar" style="background:${s.color||'#4f6ef7'}22;color:${s.color||'#4f6ef7'}">${s.name.charAt(0)}</div>
+        <div><div style="font-weight:700;font-size:0.95rem">${s.name}</div><div style="font-size:0.72rem;color:var(--muted)">${s.phone||s.email||''}</div><span class="badge ${s.role==='admin'?'badge-interested':'badge-called'}" style="margin-top:4px;display:inline-flex">${s.role==='admin'?'👑 Admin':'📞 Telecaller'}</span></div>
+      </div>
+      <div class="staff-stats">
+        <div class="sstat"><div class="sstat-val" style="color:${s.color||'#4f6ef7'}">${myLeads.length}</div><div class="sstat-label">Assigned</div></div>
+        <div class="sstat"><div class="sstat-val" style="color:#a78bfa">${interested}</div><div class="sstat-label">Interested</div></div>
+        <div class="sstat"><div class="sstat-val" style="color:var(--accent3)">${converted}</div><div class="sstat-label">Converted</div></div>
+      </div>
+      <div style="font-size:0.72rem;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:4px"><span>Today: ${todayCalled}/${s.target||30}</span><span>${pct}%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── RENDER PERFORMANCE ──
+function renderPerformance(){
+  const period=document.getElementById('perf-period').value;
+  const today=todayStr();
+  const weekAgo=new Date();weekAgo.setDate(weekAgo.getDate()-7);const weekStr=weekAgo.toISOString().split('T')[0];
+  const monthStart=new Date();monthStart.setDate(1);const monthStr=monthStart.toISOString().split('T')[0];
+  function inP(l){const d=(l.createdAt||'').split('T')[0];if(period==='today')return d===today;if(period==='week')return d>=weekStr;if(period==='month')return d>=monthStr;return true;}
+  const f=leads.filter(inP);
+  document.getElementById('p-calls').textContent=f.filter(l=>l.status==='Called'||l.lastCalledDate).length;
+  document.getElementById('p-int').textContent=f.filter(l=>l.status==='Interested').length;
+  document.getElementById('p-conv').textContent=f.filter(l=>l.status==='Converted').length;
+  document.getElementById('p-fup').textContent=f.filter(l=>l.status==='Follow-up').length;
+  const tbody=document.getElementById('perf-tbody');
+  if(!staff.length){tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><div class="ei">👥</div><p>No staff</p></div></td></tr>`;return;}
+  const rows=staff.map(s=>{
+    const ml=f.filter(l=>l.assignedTo===s.id);
+    const called=ml.filter(l=>l.status==='Called'||l.lastCalledDate).length;
+    const interested=ml.filter(l=>l.status==='Interested').length;
+    const converted=ml.filter(l=>l.status==='Converted').length;
+    const fup=ml.filter(l=>l.status==='Follow-up').length;
+    const pct=ml.length?Math.round(converted/ml.length*100):0;
+    return{s,total:ml.length,called,interested,converted,fup,pct};
+  }).sort((a,b)=>b.converted-a.converted||b.interested-a.interested);
+  tbody.innerHTML=rows.map((r,i)=>{
+    const rc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-other';
+    return `<tr>
+      <td><div class="perf-rank ${rc}">${i+1}</div></td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div style="width:30px;height:30px;border-radius:8px;background:${r.s.color||'#4f6ef7'}22;color:${r.s.color||'#4f6ef7'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.82rem">${r.s.name.charAt(0)}</div><div style="font-weight:700;font-size:0.85rem">${r.s.name}</div></div></td>
+      <td style="font-weight:700;color:#7aa3ff">${r.total}</td>
+      <td style="font-weight:700;color:var(--accent3)">${r.called}</td>
+      <td style="font-weight:700;color:#a78bfa">${r.interested}</td>
+      <td style="font-weight:700;color:var(--accent3)">${r.converted}</td>
+      <td style="font-weight:700;color:var(--orange)">${r.fup}</td>
+      <td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;min-width:50px"><div style="width:${r.pct}%;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px"></div></div><span style="font-size:0.75rem;font-weight:700;color:var(--accent3)">${r.pct}%</span></div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── DASHBOARD ──
+function updateAll(){
+  const today=todayStr();
+  document.getElementById('k-total').textContent=leads.length;
+  document.getElementById('k-today').textContent=leads.filter(l=>l.createdAt&&l.createdAt.startsWith(today)).length;
+  const fupDue=leads.filter(l=>l.followupDate&&l.followupDate<=today&&l.status==='Follow-up').length;
+  document.getElementById('k-fup').textContent=fupDue;
+  document.getElementById('k-int').textContent=leads.filter(l=>l.status==='Interested').length;
+  document.getElementById('k-conv').textContent=leads.filter(l=>l.status==='Converted').length;
+  const nb=document.getElementById('nb-new');
+  const nn=leads.filter(l=>l.status==='New').length;
+  nb.textContent=nn;nb.style.display=nn?'inline':'none';
+  const nf=document.getElementById('nb-fup');
+  nf.textContent=fupDue;nf.style.display=fupDue?'inline':'none';
+  renderDashboard();
+  updateBadges();
+}
+
+function updateBadges(){
+  const today=todayStr();
+  const fupDue=leads.filter(l=>l.followupDate&&l.followupDate<=today&&l.status==='Follow-up').length;
+  const nb=document.getElementById('nb-fup');
+  nb.textContent=fupDue;nb.style.display=fupDue?'inline':'none';
+}
+
+function renderDashboard(){
+  const today=todayStr();
+  // Recent leads
+  const rl=document.getElementById('dash-recent');
+  const recent=leads.slice(0,6);
+  rl.innerHTML=recent.length?recent.map(l=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border)">
+      <div style="width:34px;height:34px;border-radius:8px;background:${qualColor(l.quality)}22;color:${qualColor(l.quality)};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.85rem;flex-shrink:0">${l.name.charAt(0)}</div>
+      <div style="flex:1"><div style="font-weight:700;font-size:0.85rem">${l.name}</div><div style="font-size:0.72rem;color:var(--muted)">${l.phone} · ${srcIcon(l.source)}</div></div>
+      <div style="display:flex;align-items:center;gap:5px">${statusBadge(l.status)}${qualBadge(l.quality)}</div>
+    </div>`).join('')
+  :'<div class="empty-state"><div class="ei">🎯</div><p>No leads yet</p></div>';
+
+  // Sources
+  const sources=['WhatsApp','Facebook','Instagram','Manual'];
+  const srcColors={'WhatsApp':'#25d366','Facebook':'#4a90e2','Instagram':'#e1306c','Manual':'#9ca3af'};
+  const srcData=sources.map(s=>({name:s,count:leads.filter(l=>l.source===s).length}));
+  const maxS=Math.max(...srcData.map(s=>s.count),1);
+  document.getElementById('dash-sources').innerHTML=srcData.map(s=>`
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.8rem"><span>${srcIcon(s.name)} ${s.name}</span><span style="font-weight:700;color:${srcColors[s.name]}">${s.count}</span></div>
+      <div style="height:5px;background:var(--surface2);border-radius:3px;overflow:hidden"><div style="width:${Math.round(s.count/maxS*100)}%;height:100%;background:${srcColors[s.name]};border-radius:3px"></div></div>
+    </div>`).join('');
+
+  // Team today
+  const tt=document.getElementById('dash-team');
+  if(tt){
+    tt.innerHTML=staff.length?staff.map(s=>{
+      const ml=leads.filter(l=>l.assignedTo===s.id);
+      const tc=ml.filter(l=>l.lastCalledDate===today).length;
+      const pct=s.target?Math.min(100,Math.round(tc/s.target*100)):0;
+      return `<div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:8px;background:${s.color||'#4f6ef7'}22;color:${s.color||'#4f6ef7'};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.82rem">${s.name.charAt(0)}</div>
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-weight:700;font-size:0.83rem">${s.name}</span><span style="font-size:0.72rem;color:var(--muted)">${tc}/${s.target||30}</span></div>
+        <div style="height:4px;background:var(--surface2);border-radius:2px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${s.color||'#4f6ef7'};border-radius:2px"></div></div></div>
+      </div>`;
+    }).join(''):'<div class="empty-state"><div class="ei">👥</div><p>No staff added</p></div>';
+  }
+
+  // Follow-ups
+  const fups=leads.filter(l=>l.followupDate&&l.followupDate<=today&&l.status==='Follow-up').slice(0,5);
+  document.getElementById('dash-fups').innerHTML=fups.length?fups.map(l=>`
+    <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+      <div style="width:7px;height:7px;border-radius:50%;background:${l.followupDate<today?'var(--red)':'var(--yellow)'};flex-shrink:0"></div>
+      <div style="flex:1"><div style="font-weight:700;font-size:0.83rem">${l.name}</div><div style="font-size:0.7rem;color:var(--muted)">${l.assignedName||'—'} · ${fmtDate(l.followupDate)}</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="openEditLead('${l.id}')">Update</button>
+    </div>`).join('')
+  :'<div class="empty-state"><div class="ei">✅</div><p>No pending follow-ups</p></div>';
+}
+
+// ── HELPERS ──
+window.closeModal = function(id){document.getElementById(id).classList.remove('open');};
+
+// ── QUICK ADD ──
+window.openQuickAdd = function(){
+  document.getElementById('q-name').value='';
+  document.getElementById('q-phone').value='';
+  document.getElementById('q-disease').value='';
+  document.getElementById('q-service').value='Online';
+  document.getElementById('q-city').value='';
+  document.getElementById('q-quality').value='Hot';
+  document.getElementById('modal-quick').classList.add('open');
+  setTimeout(()=>document.getElementById('q-name').focus(),300);
+};
+
+window.saveQuickLead = async function(){
+  const name = document.getElementById('q-name').value.trim();
+  const phone = document.getElementById('q-phone').value.trim();
+  if(!name||!phone){showToast('❌ Naam aur phone required!');return;}
+  const assignId = currentUser.uid;
+  const assignedS = staff.find(s=>s.id===assignId);
+  const data = {
+    id: Date.now().toString(),
+    name, phone,
+    source: 'WhatsApp',
+    quality: document.getElementById('q-quality').value,
+    status: 'New',
+    followupDate: '',
+    product: '',
+    notes: '',
+    disease: document.getElementById('q-disease').value,
+    serviceType: document.getElementById('q-service').value,
+    city: document.getElementById('q-city').value,
+    address: '',
+    assignedTo: assignId||'',
+    assignedName: assignedS?assignedS.name:(document.getElementById('sidebar-username').textContent||''),
+    createdAt: new Date().toISOString(),
+    lastCalledDate: null,
+    createdBy: currentUser.uid,
+  };
+  try {
+    await setDoc(doc(db,'leads',data.id), data);
+    closeModal('modal-quick');
+    showToast('✅ Lead saved! 🎉');
+    // Reset fields
+    document.getElementById('q-name').value='';
+    document.getElementById('q-phone').value='';
+  } catch(e){ showToast('❌ Save failed!'); }
+};
+// ── WHATSAPP TEMPLATES ──
+const WA_TEMPLATES = [
+  {
+    title: "🙏 Pehli Baar Contact",
+    body: (p) => `Namaste ${p.name} ji! 🙏
+
+Hum SMT Clinic se baat kar rahe hain.
+
+Aapne hamse ${p.disease||'treatment'} ke baare mein enquiry ki thi.
+
+Hum aapki poori madad karne ke liye taiyar hain.
+
+Kya aap thoda time de sakte hain baat karne ke liye? 😊`
+  },
+  {
+    title: "📅 Follow-up Reminder",
+    body: (p) => `Namaste ${p.name} ji! 🙏
+
+SMT Clinic ki taraf se yaad dila rahe hain.
+
+Aapka follow-up scheduled tha — kya aap available hain?
+
+Hum aapke ${p.disease||'treatment'} mein poora support karenge. 🌿
+
+Please reply karein! 😊`
+  },
+  {
+    title: "🌿 Treatment Info",
+    body: (p) => `Namaste ${p.name} ji! 🙏
+
+SMT Clinic mein hum ${p.disease||'aapki takleef'} ke liye:
+
+✅ Acupuncture
+✅ Acupressure  
+✅ Magnet Therapy
+
+ke zariye natural treatment provide karte hain.
+
+Koi side effect nahi, 100% safe! 🌿
+
+Aaj hi appointment lein! 📞`
+  },
+  {
+    title: "💰 Package Offer",
+    body: (p) => `Namaste ${p.name} ji! 🙏
+
+SMT Clinic ki taraf se special offer! 🎉
+
+${p.disease||'Aapki problem'} ke liye hamara special package:
+
+🌿 Complete Treatment Plan
+✅ Expert Therapist
+🏥 ${p.serviceType==='Online'?'Online Consultation':'Clinic Visit'} Available
+
+Aaj hi contact karein aur appointment book karein!
+
+Shukriya 🙏`
+  },
+  {
+    title: "✅ Appointment Confirm",
+    body: (p) => `Namaste ${p.name} ji! 🙏
+
+Aapka SMT Clinic mein appointment confirm ho gaya hai! ✅
+
+📍 ${p.serviceType==='Online'?'Online Session (Link bheja jaayega)':'SMT Clinic, Gurgaon'}
+
+Koi bhi sawaal ho toh reply karein.
+
+Shukriya! 🌿`
+  },
+  {
+    title: "🙏 Thank You Message",
+    body: (p) => `Namaste ${p.name} ji! 🙏
+
+SMT Clinic mein aane ke liye bahut bahut shukriya! 🌿
+
+Umeed hai aapko hamare treatment se faida hua hoga.
+
+Koi bhi problem ho toh hum hamesha available hain.
+
+Apna khayal rakhein! 😊`
+  }
+];
+
+window.openWATemplate = function(leadId) {
+  const l = leads.find(x=>x.id===leadId);
+  if(!l) return;
+  document.getElementById('wa-patient-info').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:36px;height:36px;border-radius:8px;background:rgba(37,211,102,0.15);color:#25d366;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem">${l.name.charAt(0)}</div>
+      <div><div style="font-weight:700">${l.name}</div><div style="font-size:0.75rem;color:var(--muted)">${l.phone} ${l.disease?'· '+l.disease:''}</div></div>
+    </div>`;
+  const list = document.getElementById('wa-templates-list');
+  list.innerHTML = WA_TEMPLATES.map((t,i) => `
+    <div class="wa-template" onclick="selectWATemplate(${i},'${leadId}')">
+      <div class="wa-template-title">${t.title}</div>
+      <div class="wa-template-body">${t.body(l).substring(0,80)}...</div>
+      <button class="wa-template-use" onclick="selectWATemplate(${i},'${leadId}');event.stopPropagation()">Use</button>
+    </div>`).join('');
+  document.getElementById('wa-custom-msg').value = '';
+  document.getElementById('wa-send-btn').href = `https://wa.me/${l.phone.replace(/[^0-9]/g,'')}`;
+  document.getElementById('modal-wa-template').classList.add('open');
+  closeModal('modal-detail');
+};
+
+window.selectWATemplate = function(idx, leadId) {
+  const l = leads.find(x=>x.id===leadId);
+  if(!l) return;
+  const msg = WA_TEMPLATES[idx].body(l);
+  document.getElementById('wa-custom-msg').value = msg;
+  const phone = l.phone.replace(/[^0-9]/g,'');
+  const encoded = encodeURIComponent(msg);
+  document.getElementById('wa-send-btn').href = `https://wa.me/${phone}?text=${encoded}`;
+  // Highlight selected
+  document.querySelectorAll('.wa-template').forEach((el,i) => {
+    el.style.borderColor = i===idx ? '#25d366' : '';
+    el.style.background = i===idx ? 'rgba(37,211,102,0.08)' : '';
+  });
+};
+
+// Update send btn when custom msg changes
+document.addEventListener('DOMContentLoaded', () => {});
+document.getElementById('modal-wa-template') && document.getElementById('wa-custom-msg').addEventListener('input', function(){
+  const btn = document.getElementById('wa-send-btn');
+  const currentHref = btn.href;
+  const phone = currentHref.includes('wa.me') ? currentHref.split('wa.me/')[1].split('?')[0] : '';
+  if(phone) btn.href = `https://wa.me/${phone}?text=${encodeURIComponent(this.value)}`;
+});
+
+// ── DAILY REPORT ──
+window.showDailyReport = function() {
+  const today = todayStr();
+  const todayLeads = leads.filter(l => l.createdAt && l.createdAt.startsWith(today));
+  const totalLeads = leads.length;
+  const interested = leads.filter(l=>l.status==='Interested').length;
+  const converted = leads.filter(l=>l.status==='Converted').length;
+  const followupDue = leads.filter(l=>l.followupDate && l.followupDate<=today && l.status==='Follow-up').length;
+  const called = leads.filter(l=>l.status==='Called').length;
+
+  // Disease breakdown
+  const diseases = {};
+  leads.forEach(l=>{ if(l.disease){ diseases[l.disease]=(diseases[l.disease]||0)+1; }});
+  const topDiseases = Object.entries(diseases).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  // Staff performance today
+  const staffPerf = staff.map(s=>{
+    const ml = leads.filter(l=>l.assignedTo===s.id);
+    const todayCalled = ml.filter(l=>l.lastCalledDate===today).length;
+    const conv = ml.filter(l=>l.status==='Converted').length;
+    return {name:s.name, todayCalled, total:ml.length, conv};
+  }).sort((a,b)=>b.todayCalled-a.todayCalled);
+
+  const reportDate = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  document.getElementById('report-content').innerHTML = `
+    <div class="report-card">
+      <h4>📅 ${reportDate}</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:var(--surface);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#7aa3ff">${todayLeads.length}</div><div style="font-size:0.72rem;color:var(--muted)">Aaj ki Leads</div></div>
+        <div style="background:var(--surface);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--accent3)">${converted}</div><div style="font-size:0.72rem;color:var(--muted)">Converted</div></div>
+        <div style="background:var(--surface);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#a78bfa">${interested}</div><div style="font-size:0.72rem;color:var(--muted)">Interested</div></div>
+        <div style="background:var(--surface);border-radius:8px;padding:10px;text-align:center"><div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--orange)">${followupDue}</div><div style="font-size:0.72rem;color:var(--muted)">Follow-up Due</div></div>
+      </div>
+    </div>
+    ${staffPerf.length ? `<div class="report-card">
+      <h4>👥 Team Performance Today</h4>
+      ${staffPerf.map(s=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.83rem"><span style="font-weight:600">${s.name}</span><span style="color:var(--muted)">${s.todayCalled} calls · ${s.conv} converted</span></div>`).join('')}
+    </div>` : ''}
+    ${topDiseases.length ? `<div class="report-card">
+      <h4>🏥 Top Diseases</h4>
+      ${topDiseases.map(([d,c])=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:0.82rem"><span>${d}</span><span style="font-weight:700;color:#a78bfa">${c} leads</span></div>`).join('')}
+    </div>` : ''}`;
+
+  // Generate WhatsApp report text
+  const waText = `📊 *SMT Clinic Daily Report*
+📅 ${reportDate}
+
+` +
+    `🆕 Aaj ki Leads: *${todayLeads.length}*
+` +
+    `📞 Total Called: *${called}*
+` +
+    `⭐ Interested: *${interested}*
+` +
+    `✅ Converted: *${converted}*
+` +
+    `🔔 Follow-up Due: *${followupDue}*
+` +
+    `📋 Total Leads: *${totalLeads}*
+
+` +
+    (staffPerf.length ? `👥 *Team Today:*
+${staffPerf.map(s=>`• ${s.name}: ${s.todayCalled} calls`).join('
+')}
+
+` : '') +
+    (topDiseases.length ? `🏥 *Top Diseases:*
+${topDiseases.map(([d,c])=>`• ${d}: ${c}`).join('
+')}
+
+` : '') +
+    `_SMT Clinic CRM_ 🌿`;
+
+  document.getElementById('report-wa-btn').href = `https://wa.me/?text=${encodeURIComponent(waText)}`;
+  document.getElementById('modal-report').classList.add('open');
+};
+
+window.toggleOtherDisease = function(){
+  const val = document.getElementById('l-disease').value;
+  document.getElementById('other-disease-wrap').style.display = val==='Other' ? 'block' : 'none';
+};
+function todayStr(){return new Date().toISOString().split('T')[0];}
+function fmtDate(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}
+function qualColor(q){return q==='Hot'?'#ef4444':q==='Warm'?'#f97316':'#60a5fa';}
+function qualBadge(q){const cls=q==='Hot'?'badge-hot':q==='Warm'?'badge-warm':'badge-cold';const icon=q==='Hot'?'🔥':q==='Warm'?'🌤':'❄️';return`<span class="badge ${cls}">${icon} ${q||'—'}</span>`;}
+function statusBadge(s){const map={New:'badge-new',Called:'badge-called',Interested:'badge-interested','Not Interested':'badge-notint','Follow-up':'badge-followup',Converted:'badge-converted'};return`<span class="badge ${map[s]||'badge-new'}">${s||'New'}</span>`;}
+function srcTag(s){const map={WhatsApp:'src-whatsapp',Facebook:'src-facebook',Instagram:'src-instagram',Manual:'src-manual'};return`<span class="source-tag ${map[s]||'src-manual'}">${srcIcon(s)} ${s||'Manual'}</span>`;}
+function srcIcon(s){return s==='WhatsApp'?'📱':s==='Facebook'?'🔵':s==='Instagram'?'📸':'✍️';}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+window.showToast = showToast;
+
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});
+});
+</script>
+</body>
+</html>
